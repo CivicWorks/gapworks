@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alonovo — Receipt to Report Pipeline Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple-deep: #2d1b69;
+  --purple-mid: #5b3cc4;
+  --purple-bright: #7c5cfc;
+  --purple-light: #b8a5ff;
+  --purple-wash: #f0ecff;
+  --green-good: #22c55e;
+  --green-bg: #ecfdf5;
+  --yellow-mid: #eab308;
+  --yellow-bg: #fefce8;
+  --orange-warn: #f97316;
+  --orange-bg: #fff7ed;
+  --red-bad: #ef4444;
+  --red-bg: #fef2f2;
+  --slate-900: #0f172a;
+  --slate-700: #334155;
+  --slate-500: #64748b;
+  --slate-300: #cbd5e1;
+  --slate-100: #f1f5f9;
+  --white: #ffffff;
+  --receipt-bg: #fafaf5;
+  --receipt-shadow: rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--slate-100);
+  color: var(--slate-900);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--purple-deep);
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.site-header .logo {
+  font-family: 'Fraunces', serif;
+  color: var(--white);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.site-header .logo span { color: var(--purple-light); }
+.site-header .badge {
+  background: rgba(255,255,255,0.12);
+  color: var(--purple-light);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--purple-deep) 0%, #1a1145 50%, #0d0a2a 100%);
+  padding: 80px 40px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(124,92,252,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 50%, rgba(91,60,196,0.1) 0%, transparent 50%);
+  animation: drift 20s ease-in-out infinite;
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-3%, 2%); }
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  color: var(--white);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  position: relative;
+  letter-spacing: -0.03em;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--purple-light);
+}
+.hero p {
+  color: rgba(255,255,255,0.65);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero .pipeline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  padding: 8px 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  color: var(--purple-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 400;
+  position: relative;
+  letter-spacing: 0.02em;
+}
+
+/* ── PIPELINE FLOW DIAGRAM ── */
+.pipeline-section {
+  background: var(--white);
+  border-bottom: 1px solid var(--slate-300);
+  padding: 48px 40px;
+}
+.pipeline-section h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 32px;
+  color: var(--slate-700);
+  letter-spacing: -0.02em;
+}
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--purple-wash);
+  border-radius: 12px;
+  min-width: 110px;
+}
+.pipeline-step .icon { font-size: 1.5rem; }
+.pipeline-step .label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--purple-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.pipeline-arrow {
+  color: var(--purple-bright);
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+
+/* ── DEMO SECTION ── */
+.demo-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+.demo-section h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.03em;
+}
+.demo-section h2 .num {
+  color: var(--purple-bright);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 1.6rem;
+}
+.demo-section > p.subtitle {
+  color: var(--slate-500);
+  font-size: 0.95rem;
+  margin-bottom: 40px;
+}
+
+/* ── RECEIPT + REPORT GRID ── */
+.receipt-report-pair {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 40px;
+  align-items: start;
+  margin-bottom: 80px;
+}
+@media (max-width: 900px) {
+  .receipt-report-pair {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ── RECEIPT STYLING ── */
+.receipt-wrapper {
+  position: relative;
+}
+.receipt-wrapper .scan-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--purple-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.receipt {
+  background: var(--receipt-bg);
+  border: 1px solid #e8e5d8;
+  border-radius: 4px;
+  padding: 28px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  line-height: 1.7;
+  color: #2a2a2a;
+  box-shadow: 0 4px 20px var(--receipt-shadow), 0 1px 3px var(--receipt-shadow);
+  position: relative;
+  max-width: 340px;
+}
+.receipt::before, .receipt::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: linear-gradient(90deg, 
+    transparent 0%, transparent 4%, var(--receipt-bg) 4%, var(--receipt-bg) 8%,
+    transparent 8%, transparent 12%, var(--receipt-bg) 12%, var(--receipt-bg) 16%,
+    transparent 16%, transparent 20%, var(--receipt-bg) 20%, var(--receipt-bg) 24%,
+    transparent 24%, transparent 28%, var(--receipt-bg) 28%, var(--receipt-bg) 32%,
+    transparent 32%, transparent 36%, var(--receipt-bg) 36%, var(--receipt-bg) 40%,
+    transparent 40%, transparent 44%, var(--receipt-bg) 44%, var(--receipt-bg) 48%,
+    transparent 48%, transparent 52%, var(--receipt-bg) 52%, var(--receipt-bg) 56%,
+    transparent 56%, transparent 60%, var(--receipt-bg) 60%, var(--receipt-bg) 64%,
+    transparent 64%, transparent 68%, var(--receipt-bg) 68%, var(--receipt-bg) 72%,
+    transparent 72%, transparent 76%, var(--receipt-bg) 76%, var(--receipt-bg) 80%,
+    transparent 80%, transparent 84%, var(--receipt-bg) 84%, var(--receipt-bg) 88%,
+    transparent 88%, transparent 92%, var(--receipt-bg) 92%, var(--receipt-bg) 96%,
+    transparent 96%, transparent 100%
+  );
+}
+.receipt::before { top: -12px; }
+.receipt::after { bottom: -12px; transform: scaleY(-1); }
+.receipt .store-name {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin-bottom: 2px;
+}
+.receipt .store-addr {
+  text-align: center;
+  font-size: 0.6rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+.receipt .divider {
+  border: none;
+  border-top: 1px dashed #bbb;
+  margin: 10px 0;
+}
+.receipt .line-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.receipt .line-item .name { flex: 1; }
+.receipt .line-item .price { text-align: right; white-space: nowrap; }
+.receipt .line-item.matched .name { color: var(--purple-mid); font-weight: 500; }
+.receipt .total-line {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+.receipt .meta {
+  text-align: center;
+  font-size: 0.58rem;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* ── TRANSFORM ARROW ── */
+.transform-arrow {
+  display: none;
+}
+
+/* ── REPORT CARD ── */
+.report-card {
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.report-header {
+  background: linear-gradient(135deg, var(--purple-deep), var(--purple-mid));
+  padding: 28px 32px;
+  color: var(--white);
+}
+.report-header .report-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.report-header .report-meta {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+.report-body { padding: 28px 32px; }
+
+/* Overall Score */
+.overall-score {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--slate-100);
+}
+.score-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+.score-badge.grade-a { background: var(--green-good); }
+.score-badge.grade-b { background: #4ade80; }
+.score-badge.grade-b-plus { background: #34d399; }
+.score-badge.grade-c { background: var(--yellow-mid); }
+.score-badge.grade-c-minus { background: var(--orange-warn); }
+.score-badge.grade-d { background: #f97316; }
+.score-badge.grade-f { background: var(--red-bad); }
+.score-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.score-info p {
+  font-size: 0.82rem;
+  color: var(--slate-500);
+  line-height: 1.5;
+}
+
+/* Impact Stats */
+.impact-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.impact-stat {
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.impact-stat .stat-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+.impact-stat .stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.impact-stat .stat-label {
+  font-size: 0.72rem;
+  color: var(--slate-500);
+  line-height: 1.4;
+}
+.stat-red { background: var(--red-bg); }
+.stat-red .stat-value { color: var(--red-bad); }
+.stat-orange { background: var(--orange-bg); }
+.stat-orange .stat-value { color: var(--orange-warn); }
+.stat-yellow { background: var(--yellow-bg); }
+.stat-yellow .stat-value { color: #a16207; }
+.stat-green { background: var(--green-bg); }
+.stat-green .stat-value { color: #16a34a; }
+.stat-purple { background: var(--purple-wash); }
+.stat-purple .stat-value { color: var(--purple-mid); }
+
+/* Grade Breakdown */
+.grade-breakdown {
+  margin-bottom: 24px;
+}
+.grade-breakdown h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--slate-700);
+}
+.grade-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.grade-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.grade-bar-label {
+  width: 24px;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+.grade-bar-track {
+  flex: 1;
+  height: 24px;
+  background: var(--slate-100);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.grade-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--white);
+  transition: width 0.6s ease;
+}
+.grade-bar-fill.a { background: var(--green-good); }
+.grade-bar-fill.b { background: #4ade80; }
+.grade-bar-fill.c { background: var(--yellow-mid); }
+.grade-bar-fill.d { background: var(--orange-warn); }
+.grade-bar-fill.f { background: var(--red-bad); }
+.grade-bar-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--slate-500);
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Purchase List */
+.purchase-list { margin-bottom: 16px; }
+.purchase-list h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--slate-700);
+}
+.purchase-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--slate-100);
+}
+.purchase-item:last-child { border-bottom: none; }
+.purchase-item .pi-grade {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--white);
+  flex-shrink: 0;
+}
+.purchase-item .pi-info { flex: 1; }
+.purchase-item .pi-product {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.purchase-item .pi-company {
+  font-size: 0.72rem;
+  color: var(--slate-500);
+}
+.purchase-item .pi-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--slate-700);
+}
+.unmatched {
+  opacity: 0.5;
+}
+.unmatched .pi-grade {
+  background: var(--slate-300) !important;
+  font-size: 0.7rem;
+}
+
+/* Report Footer */
+.report-footer {
+  padding: 16px 32px;
+  background: var(--slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--slate-500);
+}
+.report-footer .powered {
+  font-weight: 500;
+}
+.report-footer .action-links {
+  display: flex;
+  gap: 16px;
+}
+.report-footer .action-links a {
+  color: var(--purple-mid);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* ── SECTION DIVIDERS ── */
+.section-divider {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.section-divider hr {
+  border: none;
+  border-top: 2px solid var(--slate-100);
+}
+
+/* ── CTA SECTION ── */
+.cta-section {
+  background: linear-gradient(135deg, var(--purple-deep), #1a1145);
+  padding: 60px 40px;
+  text-align: center;
+  margin-top: 20px;
+}
+.cta-section h2 {
+  font-family: 'Fraunces', serif;
+  color: var(--white);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.cta-section p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+  max-width: 500px;
+  margin: 0 auto 28px;
+}
+.cta-section .cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--purple-bright);
+  color: var(--white);
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* ── MATCH ANNOTATION ── */
+.match-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--purple-wash);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  color: var(--purple-mid);
+  font-weight: 500;
+}
+.match-summary .match-icon { font-size: 1rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .hero h1 { font-size: 1.8rem; }
+  .hero { padding: 48px 20px 40px; }
+  .demo-section { padding: 40px 20px; }
+  .receipt-report-pair { grid-template-columns: 1fr; }
+  .impact-stats { grid-template-columns: 1fr; }
+  .report-body { padding: 20px; }
+  .report-header { padding: 20px; }
+  .pipeline-flow { gap: 8px; }
+  .pipeline-step { min-width: 80px; padding: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="logo">alonovo<span>.</span></div>
+  <span class="badge">Pipeline Demo · Investor Preview</span>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <h1>From Receipt to <em>Impact Report</em></h1>
+  <p>Snap a photo of any purchase receipt. Our AI pipeline identifies brands, maps them to parent companies, and generates a personalized ESG impact report in seconds.</p>
+  <div class="pipeline-label">📱 camera → 🔍 OCR → 🧠 AI matching → 📊 report</div>
+</section>
+
+<!-- ── PIPELINE DIAGRAM ── -->
+<section class="pipeline-section">
+  <h2>How It Works</h2>
+  <div class="pipeline-flow">
+    <div class="pipeline-step">
+      <div class="icon">📸</div>
+      <div class="label">Snap<br>Receipt</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">🔤</div>
+      <div class="label">OCR<br>Extract</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">🧠</div>
+      <div class="label">AI Brand<br>Matching</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">🏢</div>
+      <div class="label">Parent Co.<br>Lookup</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">📊</div>
+      <div class="label">ESG Grade<br>& Report</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="icon">📱</div>
+      <div class="label">Impact<br>Report</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- DEMO 1: GROCERY STORE -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="demo-section">
+  <h2><span class="num">01</span> Grocery Run</h2>
+  <p class="subtitle">A typical weekly grocery trip — 12 items, 8 matched to parent companies, revealing where the money really flows.</p>
+
+  <div class="receipt-report-pair">
+    <!-- RECEIPT -->
+    <div class="receipt-wrapper">
+      <div class="scan-label">📷 Scanned receipt input</div>
+      <div class="receipt">
+        <div class="store-name">KROGER</div>
+        <div class="store-addr">1240 E Sunrise Blvd · Tucson, AZ<br>02/22/2026 · 2:47 PM</div>
+        <hr class="divider">
+        <div class="line-item matched"><span class="name">KS ORG EGGS 18CT</span><span class="price">6.49</span></div>
+        <div class="line-item matched"><span class="name">TIDE PODS OXI 42CT</span><span class="price">14.99</span></div>
+        <div class="line-item matched"><span class="name">COCA COLA 12PK</span><span class="price">7.99</span></div>
+        <div class="line-item matched"><span class="name">CHEERIOS FAM SZ</span><span class="price">5.79</span></div>
+        <div class="line-item matched"><span class="name">CHOBANI YOGURT 4PK</span><span class="price">5.49</span></div>
+        <div class="line-item"><span class="name">ORGANIC BANANAS</span><span class="price">1.89</span></div>
+        <div class="line-item matched"><span class="name">TYSON CHKN BRST 2LB</span><span class="price">9.99</span></div>
+        <div class="line-item matched"><span class="name">BOUNTY SEL-A-SZ 6R</span><span class="price">15.49</span></div>
+        <div class="line-item"><span class="name">AVOCADOS 4CT BAG</span><span class="price">3.99</span></div>
+        <div class="line-item matched"><span class="name">NESTLE PURE LIFE 24</span><span class="price">4.99</span></div>
+        <div class="line-item"><span class="name">KRG WHEAT BREAD</span><span class="price">3.29</span></div>
+        <div class="line-item matched"><span class="name">BEN&amp;JERRY HG DN</span><span class="price">5.99</span></div>
+        <hr class="divider">
+        <div class="total-line"><span>TOTAL</span><span>$86.38</span></div>
+        <div class="line-item"><span class="name">VISA ****4821</span><span class="price">$86.38</span></div>
+        <div class="meta">THANK YOU FOR SHOPPING AT KROGER<br>STORE #0482 · REG 07 · TRANS 1847</div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="report-card">
+      <div class="report-header">
+        <div class="report-title">Where Your Money Went</div>
+        <div class="report-meta">Kroger · Feb 22, 2026 · $86.38 total</div>
+      </div>
+      <div class="report-body">
+        <div class="match-summary">
+          <span class="match-icon">✓</span>
+          8 of 12 items matched to parent companies · $71.22 graded
+        </div>
+
+        <div class="overall-score">
+          <div class="score-badge grade-c">C</div>
+          <div class="score-info">
+            <h3>Overall Values Score</h3>
+            <p>Your basket spans companies with widely mixed ESG records — from Chobani's strong social scores to Nestlé's ongoing controversies.</p>
+          </div>
+        </div>
+
+        <div class="impact-stats">
+          <div class="impact-stat stat-red">
+            <div class="stat-icon">🏛️</div>
+            <div>
+              <div class="stat-value">$42.1M</div>
+              <div class="stat-label">Corporate lobbying (2024) by matched companies</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-orange">
+            <div class="stat-icon">💰</div>
+            <div>
+              <div class="stat-value">4 of 8</div>
+              <div class="stat-label">Exec pay ratio > 300:1</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-yellow">
+            <div class="stat-icon">🐄</div>
+            <div>
+              <div class="stat-value">2 of 8</div>
+              <div class="stat-label">Poor animal welfare scores</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-green">
+            <div class="stat-icon">🌱</div>
+            <div>
+              <div class="stat-value">1 company</div>
+              <div class="stat-label">B Corp or equivalent certified</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-breakdown">
+          <h4>Your Spending by Grade</h4>
+          <div class="grade-bars">
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--green-good)">A</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill a" style="width:8%">1</div></div>
+              <div class="grade-bar-amount">$5.49</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:#4ade80">B</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill b" style="width:14%">1</div></div>
+              <div class="grade-bar-amount">$9.99</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--yellow-mid)">C</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill c" style="width:42%">3</div></div>
+              <div class="grade-bar-amount">$28.27</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--orange-warn)">D</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill d" style="width:28%">2</div></div>
+              <div class="grade-bar-amount">$20.48</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--red-bad)">F</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill f" style="width:8%">1</div></div>
+              <div class="grade-bar-amount">$4.99</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purchase-list">
+          <h4>Purchase Breakdown</h4>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--green-good)">A-</div>
+            <div class="pi-info"><div class="pi-product">Chobani Yogurt 4pk</div><div class="pi-company">Chobani · Food & Beverage</div></div>
+            <div class="pi-price">$5.49</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:#4ade80">B</div>
+            <div class="pi-info"><div class="pi-product">Tyson Chicken Breast</div><div class="pi-company">Tyson Foods · Food Processing</div></div>
+            <div class="pi-price">$9.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C+</div>
+            <div class="pi-info"><div class="pi-product">Coca-Cola 12pk</div><div class="pi-company">The Coca-Cola Company · Beverages</div></div>
+            <div class="pi-price">$7.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C+</div>
+            <div class="pi-info"><div class="pi-product">Cheerios Family Size</div><div class="pi-company">General Mills · Food & Beverage</div></div>
+            <div class="pi-price">$5.79</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C</div>
+            <div class="pi-info"><div class="pi-product">Kroger Signature Eggs</div><div class="pi-company">The Kroger Co. · Retail</div></div>
+            <div class="pi-price">$6.49</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--orange-warn)">D+</div>
+            <div class="pi-info"><div class="pi-product">Tide Pods / Bounty Paper Towels</div><div class="pi-company">Procter & Gamble · Consumer Goods</div></div>
+            <div class="pi-price">$30.48</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--orange-warn)">D</div>
+            <div class="pi-info"><div class="pi-product">Ben & Jerry's Half Baked</div><div class="pi-company">Unilever · Consumer Goods</div></div>
+            <div class="pi-price">$5.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--red-bad)">F</div>
+            <div class="pi-info"><div class="pi-product">Nestlé Pure Life Water</div><div class="pi-company">Nestlé S.A. · Food & Beverage</div></div>
+            <div class="pi-price">$4.99</div>
+          </div>
+          <div class="purchase-item unmatched">
+            <div class="pi-grade" style="background:var(--slate-300)">—</div>
+            <div class="pi-info"><div class="pi-product">Organic Bananas / Avocados / Wheat Bread</div><div class="pi-company">Unmatched · Generic or store-brand items</div></div>
+            <div class="pi-price">$9.17</div>
+          </div>
+        </div>
+      </div>
+      <div class="report-footer">
+        <span class="powered">Powered by <strong>alonovo</strong> · civ.works</span>
+        <div class="action-links">
+          <a href="#">Share</a>
+          <a href="#">Alternatives</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"><hr></div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- DEMO 2: TARGET RUN -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="demo-section">
+  <h2><span class="num">02</span> Big-Box Shopping Trip</h2>
+  <p class="subtitle">A Target run mixing household essentials, baby products, and personal care — higher dollar amounts amplify the impact story.</p>
+
+  <div class="receipt-report-pair">
+    <!-- RECEIPT -->
+    <div class="receipt-wrapper">
+      <div class="scan-label">📷 Scanned receipt input</div>
+      <div class="receipt">
+        <div class="store-name">TARGET</div>
+        <div class="store-addr">7090 N Oracle Rd · Tucson, AZ<br>02/20/2026 · 11:23 AM</div>
+        <hr class="divider">
+        <div class="line-item matched"><span class="name">PAMPERS SWADDLRS SZ3</span><span class="price">32.99</span></div>
+        <div class="line-item matched"><span class="name">APPLE AIRPODS PRO 2</span><span class="price">249.99</span></div>
+        <div class="line-item matched"><span class="name">SEVENTH GEN DISH LQ</span><span class="price">4.99</span></div>
+        <div class="line-item matched"><span class="name">CREST 3D WHTE TPSTE</span><span class="price">6.49</span></div>
+        <div class="line-item matched"><span class="name">DOVE BODY WASH 22OZ</span><span class="price">8.99</span></div>
+        <div class="line-item"><span class="name">GG SPARKLING WATER 8</span><span class="price">4.29</span></div>
+        <div class="line-item matched"><span class="name">GERBER PUFFS SNACK</span><span class="price">3.49</span></div>
+        <div class="line-item matched"><span class="name">SCOTCH TAPE 3PK</span><span class="price">4.99</span></div>
+        <div class="line-item"><span class="name">UP&UP COTTON BALLS</span><span class="price">2.79</span></div>
+        <div class="line-item matched"><span class="name">HUGGIES WIPES 3X</span><span class="price">8.49</span></div>
+        <hr class="divider">
+        <div class="line-item"><span class="name">SUBTOTAL</span><span class="price">327.50</span></div>
+        <div class="line-item"><span class="name">TAX</span><span class="price">19.38</span></div>
+        <div class="total-line"><span>TOTAL</span><span>$346.88</span></div>
+        <div class="line-item"><span class="name">REDCARD ****9173</span><span class="price">$346.88</span></div>
+        <div class="meta">THANK YOU · EXPECT MORE. PAY LESS.<br>STORE 2847 · REG 03 · 02/20/26 11:23</div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="report-card">
+      <div class="report-header">
+        <div class="report-title">Where Your Money Went</div>
+        <div class="report-meta">Target · Feb 20, 2026 · $346.88 total</div>
+      </div>
+      <div class="report-body">
+        <div class="match-summary">
+          <span class="match-icon">✓</span>
+          8 of 10 items matched to 7 parent companies · $320.42 graded
+        </div>
+
+        <div class="overall-score">
+          <div class="score-badge grade-c-minus">C-</div>
+          <div class="score-info">
+            <h3>Overall Values Score</h3>
+            <p>72% of this trip's spend went to a single company (Apple) with middling ESG marks. P&G products account for most of the rest.</p>
+          </div>
+        </div>
+
+        <div class="impact-stats">
+          <div class="impact-stat stat-red">
+            <div class="stat-icon">🏛️</div>
+            <div>
+              <div class="stat-value">$58.7M</div>
+              <div class="stat-label">Corporate lobbying (2024) by matched companies</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-orange">
+            <div class="stat-icon">⚠️</div>
+            <div>
+              <div class="stat-value">3 of 7</div>
+              <div class="stat-label">Significant supply chain labor concerns</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-yellow">
+            <div class="stat-icon">💰</div>
+            <div>
+              <div class="stat-value">5 of 7</div>
+              <div class="stat-label">Exec pay ratio > 300:1</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-green">
+            <div class="stat-icon">🌿</div>
+            <div>
+              <div class="stat-value">1 company</div>
+              <div class="stat-label">B Corp certified (Seventh Generation)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-breakdown">
+          <h4>Your Spending by Grade</h4>
+          <div class="grade-bars">
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--green-good)">A</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill a" style="width:2%"></div></div>
+              <div class="grade-bar-amount">$4.99</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:#4ade80">B</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill b" style="width:3%"></div></div>
+              <div class="grade-bar-amount">$8.49</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--yellow-mid)">C</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill c" style="width:82%">$253.48</div></div>
+              <div class="grade-bar-amount">$253.48</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--orange-warn)">D</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill d" style="width:17%">$48.47</div></div>
+              <div class="grade-bar-amount">$48.47</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--red-bad)">F</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill f" style="width:2%"></div></div>
+              <div class="grade-bar-amount">$4.99</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purchase-list">
+          <h4>Purchase Breakdown</h4>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--green-good)">A-</div>
+            <div class="pi-info"><div class="pi-product">Seventh Generation Dish Liquid</div><div class="pi-company">Seventh Generation (Unilever sub.) · B Corp Certified</div></div>
+            <div class="pi-price">$4.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:#4ade80">B</div>
+            <div class="pi-info"><div class="pi-product">Huggies Wipes 3x</div><div class="pi-company">Kimberly-Clark · Consumer Goods</div></div>
+            <div class="pi-price">$8.49</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C+</div>
+            <div class="pi-info"><div class="pi-product">Apple AirPods Pro 2</div><div class="pi-company">Apple Inc. · Technology</div></div>
+            <div class="pi-price">$249.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C</div>
+            <div class="pi-info"><div class="pi-product">Gerber Puffs Snack</div><div class="pi-company">Nestlé S.A. · Food & Beverage</div></div>
+            <div class="pi-price">$3.49</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--orange-warn)">D+</div>
+            <div class="pi-info"><div class="pi-product">Pampers Swaddlers / Crest Toothpaste</div><div class="pi-company">Procter & Gamble · Consumer Goods</div></div>
+            <div class="pi-price">$39.48</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--orange-warn)">D</div>
+            <div class="pi-info"><div class="pi-product">Dove Body Wash</div><div class="pi-company">Unilever · Consumer Goods</div></div>
+            <div class="pi-price">$8.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--red-bad)">F</div>
+            <div class="pi-info"><div class="pi-product">Scotch Tape 3pk</div><div class="pi-company">3M Company · Industrial</div></div>
+            <div class="pi-price">$4.99</div>
+          </div>
+          <div class="purchase-item unmatched">
+            <div class="pi-grade" style="background:var(--slate-300)">—</div>
+            <div class="pi-info"><div class="pi-product">Good & Gather Water / Up&Up Cotton Balls</div><div class="pi-company">Target store brands · mapped to Target Corp (pending)</div></div>
+            <div class="pi-price">$7.08</div>
+          </div>
+        </div>
+      </div>
+      <div class="report-footer">
+        <span class="powered">Powered by <strong>alonovo</strong> · civ.works</span>
+        <div class="action-links">
+          <a href="#">Share</a>
+          <a href="#">Alternatives</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"><hr></div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- DEMO 3: COSTCO -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="demo-section">
+  <h2><span class="num">03</span> Wholesale Club Haul</h2>
+  <p class="subtitle">High-volume Costco purchases — fewer items but bigger spend per line, showing how bulk buying concentrates impact.</p>
+
+  <div class="receipt-report-pair">
+    <!-- RECEIPT -->
+    <div class="receipt-wrapper">
+      <div class="scan-label">📷 Scanned receipt input</div>
+      <div class="receipt">
+        <div class="store-name">COSTCO WHOLESALE</div>
+        <div class="store-addr">3901 W Costco Dr · Tucson, AZ<br>02/18/2026 · 4:12 PM</div>
+        <hr class="divider">
+        <div class="line-item matched"><span class="name">KS ORG OLV OIL 2L</span><span class="price">16.99</span></div>
+        <div class="line-item matched"><span class="name">CHARMIN ULT SFT 30R</span><span class="price">24.99</span></div>
+        <div class="line-item matched"><span class="name">KS ROTISSERIE CHKN</span><span class="price">4.99</span></div>
+        <div class="line-item matched"><span class="name">SAMSUNG 55" QLED TV</span><span class="price">449.99</span></div>
+        <div class="line-item matched"><span class="name">FRITO LAY VARIETY 42</span><span class="price">16.49</span></div>
+        <div class="line-item matched"><span class="name">STARBUCKS PIKE 40OZ</span><span class="price">18.99</span></div>
+        <div class="line-item matched"><span class="name">DAWN PLTNM DISH 90OZ</span><span class="price">12.49</span></div>
+        <div class="line-item matched"><span class="name">OATLY BARISTA 6PK</span><span class="price">11.99</span></div>
+        <hr class="divider">
+        <div class="line-item"><span class="name">SUBTOTAL</span><span class="price">556.92</span></div>
+        <div class="line-item"><span class="name">TAX</span><span class="price">32.86</span></div>
+        <div class="total-line"><span>TOTAL</span><span>$589.78</span></div>
+        <div class="line-item"><span class="name">COSTCO VISA ****6204</span><span class="price">$589.78</span></div>
+        <div class="meta">MEMBER #4728 1093 2847<br>ITEMS SOLD: 8</div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="report-card">
+      <div class="report-header">
+        <div class="report-title">Where Your Money Went</div>
+        <div class="report-meta">Costco · Feb 18, 2026 · $589.78 total</div>
+      </div>
+      <div class="report-body">
+        <div class="match-summary">
+          <span class="match-icon">✓</span>
+          8 of 8 items matched to 8 parent companies · 100% coverage
+        </div>
+
+        <div class="overall-score">
+          <div class="score-badge grade-c-minus">C-</div>
+          <div class="score-info">
+            <h3>Overall Values Score</h3>
+            <p>A single electronics purchase (Samsung) dominates 76% of spend. The TV's supply chain labor concerns pull the overall score down significantly.</p>
+          </div>
+        </div>
+
+        <div class="impact-stats">
+          <div class="impact-stat stat-red">
+            <div class="stat-icon">🏛️</div>
+            <div>
+              <div class="stat-value">$89.4M</div>
+              <div class="stat-label">Corporate lobbying (2024) by these 8 companies</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-orange">
+            <div class="stat-icon">⚠️</div>
+            <div>
+              <div class="stat-value">2 of 8</div>
+              <div class="stat-label">Active supply chain labor violations</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-purple">
+            <div class="stat-icon">📊</div>
+            <div>
+              <div class="stat-value">76%</div>
+              <div class="stat-label">of spend on one company (Samsung)</div>
+            </div>
+          </div>
+          <div class="impact-stat stat-green">
+            <div class="stat-icon">✨</div>
+            <div>
+              <div class="stat-value">2 companies</div>
+              <div class="stat-label">Strong sustainability commitments</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-breakdown">
+          <h4>Your Spending by Grade</h4>
+          <div class="grade-bars">
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--green-good)">A</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill a" style="width:5%"></div></div>
+              <div class="grade-bar-amount">$16.98</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:#4ade80">B</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill b" style="width:6%"></div></div>
+              <div class="grade-bar-amount">$18.99</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--yellow-mid)">C</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill c" style="width:82%">$466.48</div></div>
+              <div class="grade-bar-amount">$466.48</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--orange-warn)">D</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill d" style="width:10%">$37.48</div></div>
+              <div class="grade-bar-amount">$37.48</div>
+            </div>
+            <div class="grade-bar-row">
+              <div class="grade-bar-label" style="color:var(--red-bad)">F</div>
+              <div class="grade-bar-track"><div class="grade-bar-fill f" style="width:0%"></div></div>
+              <div class="grade-bar-amount">$0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purchase-list">
+          <h4>Purchase Breakdown</h4>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--green-good)">A-</div>
+            <div class="pi-info"><div class="pi-product">Oatly Barista Edition 6pk</div><div class="pi-company">Oatly Group · Food & Beverage</div></div>
+            <div class="pi-price">$11.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--green-good)">A-</div>
+            <div class="pi-info"><div class="pi-product">Kirkland Signature Rotisserie Chicken</div><div class="pi-company">Costco Wholesale · Retail</div></div>
+            <div class="pi-price">$4.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:#4ade80">B+</div>
+            <div class="pi-info"><div class="pi-product">Starbucks Pike Place 40oz</div><div class="pi-company">Starbucks Corp. · Food & Beverage</div></div>
+            <div class="pi-price">$18.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C+</div>
+            <div class="pi-info"><div class="pi-product">Samsung 55" QLED TV</div><div class="pi-company">Samsung Electronics · Technology</div></div>
+            <div class="pi-price">$449.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C</div>
+            <div class="pi-info"><div class="pi-product">Kirkland Signature Organic Olive Oil</div><div class="pi-company">Costco Wholesale · Retail</div></div>
+            <div class="pi-price">$16.99</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--orange-warn)">D+</div>
+            <div class="pi-info"><div class="pi-product">Charmin Ultra Soft / Dawn Platinum</div><div class="pi-company">Procter & Gamble · Consumer Goods</div></div>
+            <div class="pi-price">$37.48</div>
+          </div>
+          <div class="purchase-item">
+            <div class="pi-grade" style="background:var(--yellow-mid)">C-</div>
+            <div class="pi-info"><div class="pi-product">Frito-Lay Variety Pack 42ct</div><div class="pi-company">PepsiCo · Food & Beverage</div></div>
+            <div class="pi-price">$16.49</div>
+          </div>
+        </div>
+      </div>
+      <div class="report-footer">
+        <span class="powered">Powered by <strong>alonovo</strong> · civ.works</span>
+        <div class="action-links">
+          <a href="#">Share</a>
+          <a href="#">Alternatives</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <h2>Every receipt tells a story.</h2>
+  <p>The pipeline is simple: snap, match, report. The impact is personal — and shareable. Ready to build?</p>
+  <a class="cta-badge" href="https://civicworks.github.io/gapworks/alonovo/">View Full Product Mockups →</a>
+</section>
+
+</body>
+</html>
