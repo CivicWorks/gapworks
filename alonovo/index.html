@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alonovo — Know What Your Money Supports</title>
+<meta property="og:title" content="Alonovo — ESG Intelligence for Conscious Consumers">
+<meta property="og:description" content="Know what your money supports. Choose better.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0F14;
+    --surface: #151920;
+    --surface-alt: #1C2129;
+    --border: #2A3040;
+    --text: #F0F2F5;
+    --text-muted: #B0B8C8;
+    --accent: #22C55E;
+    --accent-dim: rgba(34,197,94,0.15);
+    --warning: #F59E0B;
+    --warning-dim: rgba(245,158,11,0.15);
+    --danger: #EF4444;
+    --danger-dim: rgba(239,68,68,0.15);
+    --info: #3B82F6;
+    --info-dim: rgba(59,130,246,0.15);
+    --purple: #A855F7;
+    --purple-dim: rgba(168,85,247,0.15);
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body: 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-up { animation: fadeUp 0.5s ease-out both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+
+  /* Top bar */
+  .top-bar {
+    padding: 20px 24px 0;
+    text-align: center;
+  }
+  .top-bar .logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--accent);
+  }
+  .top-bar .badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .top-bar .tagline {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 20px 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+  .tab-btn.active {
+    background: var(--accent-dim);
+    border-color: rgba(34,197,94,0.4);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .tab-btn .icon { font-size: 15px; }
+
+  /* Content area */
+  .content {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+  }
+  .mockup-panel { display: none; }
+  .mockup-panel.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+  /* ─── Shared components ─── */
+  .section-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 24px 20px;
+    margin-bottom: 24px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--text);
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .pill {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* MOCKUP 1: Personal Impact Dashboard         */
+  /* ─────────────────────────────────────────── */
+  .dashboard-header { text-align: center; margin-bottom: 40px; }
+  .dashboard-header .pill {
+    background: var(--warning-dim);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: var(--warning);
+    margin-bottom: 16px;
+  }
+  .dashboard-header h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    color: var(--text);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .dashboard-header p { font-size: 15px; color: var(--text-muted); }
+
+  /* Overall score circle */
+  .score-ring {
+    text-align: center;
+    padding: 32px 24px;
+    background: linear-gradient(135deg, var(--surface), var(--surface-alt));
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+  .score-ring .ring {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--warning);
+    background: var(--warning-dim);
+    margin: 12px 0;
+  }
+  .score-ring .ring span {
+    font-family: var(--font-display);
+    font-size: 44px;
+    color: var(--warning);
+  }
+  .score-ring .note {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .score-ring .note .green { color: var(--accent); }
+
+  /* Impact stats grid */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .impact-card {
+    border-radius: 12px;
+    padding: 20px 18px;
+  }
+  .impact-card .emoji { font-size: 22px; margin-bottom: 8px; }
+  .impact-card .value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin-bottom: 4px;
+  }
+  .impact-card .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .impact-card .sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Purchase list */
+  .purchase-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .purchase-row:last-child { border-bottom: none; }
+  .purchase-row .left { display: flex; align-items: center; gap: 12px; }
+  .purchase-row .grade-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .purchase-row .name { font-size: 14px; font-weight: 500; }
+  .purchase-row .amount { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); }
+
+  /* Grade bar */
+  .grade-bar-row {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 32px;
+    margin-bottom: 12px;
+  }
+  .grade-bar-row .segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--bg);
+  }
+  .grade-bar-labels { display: flex; justify-content: space-between; }
+  .grade-bar-labels span { text-align: center; font-size: 11px; color: var(--text-muted); }
+
+  /* CTA */
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #16A34A);
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    margin-bottom: 8px;
+    transition: transform 0.15s ease;
+  }
+  .cta-btn:hover { transform: translateY(-1px); }
+
+  /* ─────────────────────────────────────────── */
+  /* MOCKUP 2: Company Card                      */
+  /* ─────────────────────────────────────────── */
+  .company-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .company-card-header {
+    background: linear-gradient(135deg, var(--surface-alt), var(--bg));
+    padding: 28px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .company-card-header .company-info { display: flex; align-items: center; gap: 10px; }
+  .company-card-header .company-emoji { font-size: 28px; }
+  .company-card-header h2 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--text);
+    font-weight: 400;
+    margin: 0;
+  }
+  .company-card-header .ticker { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .overall-grade-box {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .overall-grade-box span { font-family: var(--font-display); font-size: 34px; }
+  .company-card-body { padding: 20px 24px; }
+
+  .score-row { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border-bottom: none; }
+  .score-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .score-row-top .cat { font-size: 14px; font-weight: 500; }
+  .score-row-top .grade-pill {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 6px;
+  }
+  .score-bar {
+    height: 6px;
+    background: var(--surface-alt);
+    border-radius: 3px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease-out;
+  }
+  .score-row .detail { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+  .company-card-footer {
+    background: var(--surface-alt);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+  .company-card-footer .brand { display: flex; align-items: center; gap: 8px; }
+  .company-card-footer .brand .name { font-family: var(--font-display); font-size: 16px; color: var(--accent); }
+  .company-card-footer .brand .verified { font-size: 11px; color: var(--text-muted); }
+  .share-btns { display: flex; gap: 8px; }
+  .share-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .share-btn:hover { border-color: var(--accent); }
+  .social-note { text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  /* civ.works logo */
+  .civworks-logo {
+    font-family: 'Special Elite', cursive;
+    color: #7C3AED;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    background: #FFFFFF;
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .civworks-logo .dot { color: #22C55E; }
+  .civworks-logo-inline {
+    font-family: 'Special Elite', cursive;
+    color: #7C3AED;
+    letter-spacing: 0.5px;
+    background: #FFFFFF;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .civworks-logo-inline .dot { color: #22C55E; }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .logo-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* MOCKUP 3: Alternatives Report               */
+  /* ─────────────────────────────────────────── */
+  .report-header {
+    background: linear-gradient(135deg, var(--surface), var(--surface-alt));
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 32px 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header .glow {
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at top right, rgba(34,197,94,0.03), transparent);
+  }
+  .report-header .org-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .report-header .org-emoji { font-size: 28px; }
+  .report-header .pub-by { font-family: var(--font-mono); font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; }
+  .report-header .org-name { font-family: var(--font-display); font-size: 20px; color: var(--text); }
+  .report-header h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .report-header h2 .green { color: var(--accent); }
+  .report-header .desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Target company (red box) */
+  .target-box {
+    background: var(--danger-dim);
+    border-radius: 16px;
+    border: 1px solid rgba(239,68,68,0.15);
+    padding: 24px 22px;
+    margin-bottom: 24px;
+  }
+  .target-box .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .target-box h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--danger);
+    font-weight: 400;
+  }
+  .target-box .f-grade {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--danger);
+    background: rgba(239,68,68,0.15);
+    padding: 4px 14px;
+    border-radius: 8px;
+  }
+  .target-box .reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .target-box .reason .bullet { color: var(--danger); flex-shrink: 0; }
+  .target-box .sources {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(239,68,68,0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(239,68,68,0.12);
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Alternatives */
+  .alt-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .alt-header .title { font-family: var(--font-display); font-size: 22px; color: var(--text); }
+  .alt-header .verified-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .alt-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 22px 20px;
+    margin-bottom: 12px;
+  }
+  .alt-card .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .alt-card h4 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text);
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+  .alt-card .sector { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .alt-card .alt-grade {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 8px;
+  }
+  .alt-card .why { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
+  .alt-card .stats-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .alt-card .stat-box {
+    background: var(--surface-alt);
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 100px;
+  }
+  .alt-card .stat-box .stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .alt-card .stat-box .stat-val {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Report footer */
+  .report-footer {
+    background: var(--surface-alt);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .report-footer .message { font-size: 13px; font-weight: 500; }
+  .report-footer .message .green { color: var(--accent); }
+  .report-footer .powered { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .report-footer .share-btn-lg {
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bg);
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    transition: transform 0.15s;
+  }
+  .report-footer .share-btn-lg:hover { transform: translateY(-1px); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .impact-grid { grid-template-columns: 1fr; }
+    .impact-card .value { font-size: 24px; }
+    .dashboard-header h2 { font-size: 26px; }
+    .report-header h2 { font-size: 22px; }
+    .tabs { gap: 4px; }
+    .tab-btn { padding: 8px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="logo-row">
+    <span class="logo">alonovo</span>
+    <span class="logo-divider"></span>
+    <span class="civworks-logo">civ<span class="dot">.</span>works</span>
+    <span class="badge">INVESTOR PREVIEW</span>
+  </div>
+  <p class="tagline">Know what your money supports. Choose better.</p>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(0)">
+    <span class="icon">🧾</span> Personal Impact
+  </button>
+  <button class="tab-btn" onclick="switchTab(1)">
+    <span class="icon">🏢</span> Company Card
+  </button>
+  <button class="tab-btn" onclick="switchTab(2)">
+    <span class="icon">🔄</span> Alternatives Report
+  </button>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MOCKUP 1: Personal Impact Dashboard        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="mockup-panel active" id="panel-0">
+
+  <div class="dashboard-header animate-up">
+    <span class="pill">Your Impact Report</span>
+    <h2>Where Your Money Went</h2>
+    <p>January 2025 · 8 purchases · $776.51 total</p>
+  </div>
+
+  <!-- Overall Score -->
+  <div class="score-ring animate-up delay-1">
+    <div class="mono-label">Overall Values Score</div>
+    <div class="ring"><span>C-</span></div>
+    <p class="note">Your spending leans toward companies with mixed ESG records. <span class="green">See below for the impact — and how small shifts could make a big difference.</span></p>
+  </div>
+
+  <!-- Impact Grid -->
+  <div class="impact-grid">
+    <div class="impact-card animate-up delay-1" style="background:var(--danger-dim); border:1px solid rgba(239,68,68,0.15);">
+      <div class="emoji">🏛️</div>
+      <div class="value" style="color:var(--danger);">$68.3M</div>
+      <div class="label">Corporate Political Lobbying</div>
+      <div class="sub">total spent in 2024 by the companies you purchased from</div>
+    </div>
+    <div class="impact-card animate-up delay-2" style="background:var(--warning-dim); border:1px solid rgba(245,158,11,0.15);">
+      <div class="emoji">⚠️</div>
+      <div class="value" style="color:var(--warning);">3 of 8</div>
+      <div class="label">ICE Contract Companies</div>
+      <div class="sub">companies you purchased from hold ICE contracts</div>
+    </div>
+    <div class="impact-card animate-up delay-3" style="background:var(--purple-dim); border:1px solid rgba(168,85,247,0.15);">
+      <div class="emoji">💰</div>
+      <div class="value" style="color:var(--purple);">5 of 8</div>
+      <div class="label">Exec Pay Ratio &gt; 300:1</div>
+      <div class="sub">companies have extreme executive compensation</div>
+    </div>
+    <div class="impact-card animate-up delay-4" style="background:var(--info-dim); border:1px solid rgba(59,130,246,0.15);">
+      <div class="emoji">🌍</div>
+      <div class="value" style="color:var(--info);">~0.2 tons</div>
+      <div class="label">Carbon Footprint</div>
+      <div class="sub">estimated CO₂ from production &amp; shipping of your purchases</div>
+    </div>
+  </div>
+
+  <!-- Purchase Breakdown -->
+  <div class="section-card animate-up">
+    <h3 class="section-title">Purchase Breakdown</h3>
+    <div id="purchase-list"></div>
+  </div>
+
+  <!-- Grade Distribution -->
+  <div class="section-card animate-up">
+    <h3 class="section-title">Your Spending by Grade</h3>
+    <div class="grade-bar-row">
+      <div class="segment" style="flex:1; background:var(--accent);">A</div>
+      <div class="segment" style="flex:2; background:#4ADE80;">B</div>
+      <div class="segment" style="flex:2; background:var(--warning);">C</div>
+      <div class="segment" style="flex:2; background:#F97316;">D</div>
+      <div class="segment" style="flex:1; background:var(--danger);">F</div>
+    </div>
+    <div class="grade-bar-labels">
+      <span>1 company</span>
+      <span>2 companies</span>
+      <span>2 companies</span>
+      <span>2 companies</span>
+      <span>1 company</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center; padding-top:12px;" class="animate-up">
+    <button class="cta-btn">🔄 See Better Alternatives for Your Purchases</button>
+    <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">Share your impact report · Challenge a friend · Track monthly</p>
+    <p style="font-size:11px; color:var(--text-muted); margin-top:16px;">Powered by <span style="font-family:var(--font-display); color:var(--accent);">alonovo</span> · <span class="civworks-logo-inline" style="font-size:11px;">civ<span class="dot">.</span>works</span></p>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MOCKUP 2: Company Rating Card              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="mockup-panel" id="panel-1">
+
+  <div class="company-card animate-up">
+    <div class="company-card-header">
+      <div>
+        <div class="company-info">
+          <span class="company-emoji">📦</span>
+          <div>
+            <h2>Amazon</h2>
+            <span class="ticker">AMZN · Retail / Technology</span>
+          </div>
+        </div>
+      </div>
+      <div class="overall-grade-box" style="background:rgba(245,158,11,0.1); border:2px solid rgba(245,158,11,0.3);">
+        <span style="color:var(--warning);">C-</span>
+      </div>
+    </div>
+
+    <div class="company-card-body" id="score-list"></div>
+
+    <div class="company-card-footer">
+      <div class="brand">
+        <span class="name">alonovo</span>
+        <span class="verified">· <span class="civworks-logo-inline" style="font-size:12px;">civ<span class="dot">.</span>works</span> · Verified ESG Data</span>
+      </div>
+      <div class="share-btns">
+        <button class="share-btn">𝕏</button>
+        <button class="share-btn">📋</button>
+        <button class="share-btn">↗</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="social-note">↑ Optimized for social sharing — renders as an Open Graph card on Twitter/X, Bluesky, Facebook</p>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MOCKUP 3: Alternatives Report              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="mockup-panel" id="panel-2">
+
+  <!-- Report Header -->
+  <div class="report-header animate-up">
+    <div class="glow"></div>
+    <div class="org-row">
+      <span class="org-emoji">🌎</span>
+      <div>
+        <div class="pub-by">Published by</div>
+        <div class="org-name">Climate Action Network</div>
+      </div>
+    </div>
+    <h2>Instead of ExxonMobil,<br><span class="green">Choose Better.</span></h2>
+    <p class="desc">A data-driven guide to shifting your energy spending toward companies aligned with climate action — backed by verified ESG data, not anecdotes.</p>
+  </div>
+
+  <!-- Target Company -->
+  <div class="target-box animate-up delay-1">
+    <div class="top-row">
+      <h3>⛽ ExxonMobil</h3>
+      <span class="f-grade">F</span>
+    </div>
+    <div class="mono-label" style="margin-bottom:10px;">Key Findings</div>
+    <div class="reason"><span class="bullet">▸</span> $30.7M in political lobbying against climate legislation</div>
+    <div class="reason"><span class="bullet">▸</span> Funded climate denial research for 40+ years</div>
+    <div class="reason"><span class="bullet">▸</span> 489 million metric tons CO₂ emissions (2023)</div>
+    <div class="reason"><span class="bullet">▸</span> Active lawsuits from 20+ state attorneys general</div>
+    <div class="sources">Sources: SEC filings, FEC records, EPA emissions data, GRI/SASB frameworks</div>
+  </div>
+
+  <!-- Alternatives -->
+  <div class="animate-up delay-2">
+    <div class="alt-header">
+      <span class="title">Better Alternatives</span>
+      <span class="verified-badge">DATA-VERIFIED</span>
+    </div>
+
+    <div class="alt-card">
+      <div class="card-top">
+        <div>
+          <h4>NextEra Energy</h4>
+          <span class="sector">Renewable Energy</span>
+        </div>
+        <span class="alt-grade" style="color:var(--accent); background:var(--accent-dim);">A-</span>
+      </div>
+      <p class="why">World's largest generator of wind and solar energy. Transparent lobbying. Strong worker policies.</p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Lobbying</div><div class="stat-val">$2.1M</div></div>
+        <div class="stat-box"><div class="stat-label">Emissions</div><div class="stat-val">92% lower</div></div>
+        <div class="stat-box"><div class="stat-label">Pay Ratio</div><div class="stat-val">87:1</div></div>
+      </div>
+    </div>
+
+    <div class="alt-card">
+      <div class="card-top">
+        <div>
+          <h4>Ørsted</h4>
+          <span class="sector">Offshore Wind</span>
+        </div>
+        <span class="alt-grade" style="color:var(--accent); background:var(--accent-dim);">A</span>
+      </div>
+      <p class="why">Transformed from fossil fuels to 99% green energy. Industry-leading ESG scores across all frameworks.</p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Lobbying</div><div class="stat-val">$0.8M</div></div>
+        <div class="stat-box"><div class="stat-label">Emissions</div><div class="stat-val">96% lower</div></div>
+        <div class="stat-box"><div class="stat-label">Pay Ratio</div><div class="stat-val">42:1</div></div>
+      </div>
+    </div>
+
+    <div class="alt-card">
+      <div class="card-top">
+        <div>
+          <h4>Brookfield Renewable</h4>
+          <span class="sector">Diversified Renewables</span>
+        </div>
+        <span class="alt-grade" style="color:#4ADE80; background:rgba(74,222,128,0.12);">B+</span>
+      </div>
+      <p class="why">Hydroelectric, wind, solar portfolio across 5 continents. Strong governance scores.</p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Lobbying</div><div class="stat-val">$1.4M</div></div>
+        <div class="stat-box"><div class="stat-label">Emissions</div><div class="stat-val">89% lower</div></div>
+        <div class="stat-box"><div class="stat-label">Pay Ratio</div><div class="stat-val">63:1</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Footer -->
+  <div class="report-footer animate-up delay-3">
+    <div>
+      <div class="message">Not a boycott — a <span class="green">better choice</span>.</div>
+      <div class="powered">Powered by alonovo · <span class="civworks-logo-inline" style="font-size:11px;">civ<span class="dot">.</span>works</span> · Data from SEC, FEC, EPA, GRI, SASB, TCFD</div>
+    </div>
+    <button class="share-btn-lg">Share Report</button>
+  </div>
+
+</div>
+
+</div><!-- end .content -->
+
+<script>
+  // ─── Tab switching ───
+  function switchTab(index) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.mockup-panel').forEach((panel, i) => {
+      panel.classList.toggle('active', i === index);
+    });
+  }
+
+  // ─── Populate purchase list ───
+  const purchases = [
+    { store: 'Walmart', amount: 127.43, grade: 'D+', color: '#F59E0B' },
+    { store: 'Amazon', amount: 89.99, grade: 'C-', color: '#F59E0B' },
+    { store: 'Costco', amount: 214.67, grade: 'B+', color: '#22C55E' },
+    { store: 'Starbucks', amount: 34.50, grade: 'C', color: '#F59E0B' },
+    { store: 'Target', amount: 67.22, grade: 'B-', color: '#3B82F6' },
+    { store: 'Chick-fil-A', amount: 28.40, grade: 'D', color: '#EF4444' },
+    { store: 'Patagonia', amount: 156.00, grade: 'A', color: '#22C55E' },
+    { store: 'ExxonMobil', amount: 58.30, grade: 'F', color: '#EF4444' },
+  ];
+
+  const purchaseList = document.getElementById('purchase-list');
+  purchases.forEach(p => {
+    purchaseList.innerHTML += `
+      <div class="purchase-row">
+        <div class="left">
+          <div class="grade-box" style="background:${p.color}18; border:1px solid ${p.color}30; color:${p.color};">${p.grade}</div>
+          <div class="name">${p.store}</div>
+        </div>
+        <div class="amount">$${p.amount.toFixed(2)}</div>
+      </div>`;
+  });
+
+  // ─── Populate company scores ───
+  const scores = [
+    { category: 'Political Lobbying', grade: 'F', color: '#EF4444', detail: '$21.4M spent in 2024', bar: 15 },
+    { category: 'Worker Treatment', grade: 'D', color: '#EF4444', detail: 'Warehouse injury rate 2x industry avg', bar: 28 },
+    { category: 'Environmental Impact', grade: 'C+', color: '#F59E0B', detail: 'Climate Pledge by 2040, but rising emissions', bar: 55 },
+    { category: 'Executive Compensation', grade: 'D-', color: '#EF4444', detail: 'CEO-to-worker pay ratio: 6,474:1', bar: 20 },
+    { category: 'Animal Welfare', grade: 'C', color: '#F59E0B', detail: 'Mixed — depends on marketplace sellers', bar: 45 },
+    { category: 'ICE/Immigration', grade: 'F', color: '#EF4444', detail: 'Active AWS contracts with ICE/CBP', bar: 10 },
+  ];
+
+  const scoreList = document.getElementById('score-list');
+  scores.forEach(s => {
+    scoreList.innerHTML += `
+      <div class="score-row">
+        <div class="score-row-top">
+          <span class="cat">${s.category}</span>
+          <span class="grade-pill" style="color:${s.color}; background:${s.color}18;">${s.grade}</span>
+        </div>
+        <div class="score-bar">
+          <div class="score-bar-fill" style="width:${s.bar}%; background:${s.color};"></div>
+        </div>
+        <span class="detail">${s.detail}</span>
+      </div>`;
+  });
+</script>
+
+</body>
+</html>
